@@ -8,15 +8,15 @@ const storageHandler =
     formatVersion: 1,
 
     // type can be 'localStorage' or 'sessionStorage'
-    available: function(type) {
+    available: function (type) {
       try {
         var storage = window[type],
-            x = '__storage_test__';
+          x = '__storage_test__';
         storage.setItem(x, x);
         storage.removeItem(x);
         return true;
       }
-      catch(e) {
+      catch (e) {
         return false;
       }
     },
@@ -29,17 +29,17 @@ const storageHandler =
       // enters private mode (Safari sets quota to 0 bytes in private mode,
       // contrary to other browsers, which allow storage in private mode,
       // using separate data containers).
-      set: function(key, value) {
+      set: function (key, value) {
         try {
           window.localStorage.setItem(key.toString(), value.toString());
           return true;
         }
-        catch(e) {
+        catch (e) {
           return false;
         }
       },
 
-      get: function(key) {
+      get: function (key) {
         var value = window.localStorage.getItem(key.toString());
 
         if (value === 'true')
@@ -56,11 +56,29 @@ const storageHandler =
         return +value;
       },
 
-      setFormatVersion: function() {
+      remove: function (key) {
+        var value = window.sessionStorage.removeItem(key.toString());
+
+        if (value === 'true')
+          return true;
+        if (value === 'false')
+          return false;
+
+        // isNan returns false for empty string
+        // empty string is considered 0 by isNaN, but NaN by parseInt :)
+        if (isNaN(value) || value === '')
+          return value;
+
+        // return value converted to number
+        return +value;
+
+      },
+      
+      setFormatVersion: function () {
         storageHandler.storage.local.set('formatVersion', storageHandler.storage.formatVersion);
       },
 
-      isOutdatedOrNotSet: function() {
+      isOutdatedOrNotSet: function () {
         var version = storageHandler.storage.local.get('formatVersion');
         if (!version || version < storageHandler.storage.formatVersion)
           return true;
@@ -70,52 +88,70 @@ const storageHandler =
     },
 
     session: {
-        // Use this function over window.sessionStorage.setItem() because
-        // localStorage.setItem() or sessionStorage.setItem() may throw
-        // an exception if the storage is full.
-        // in Mobile Safari (since iOS 5) it always throws when the user
-        // enters private mode (Safari sets quota to 0 bytes in private mode,
-        // contrary to other browsers, which allow storage in private mode,
-        // using separate data containers).
-        set: function(key, value) {
-          try {
-            window.sessionStorage.setItem(key.toString(), value.toString());
-            return true;
-          }
-          catch(e) {
-            return false;
-          }
-        },
-  
-        get: function(key) {
-          var value = window.sessionStorage.getItem(key.toString());
-  
-          if (value === 'true')
-            return true;
-          if (value === 'false')
-            return false;
-  
-          // isNan returns false for empty string
-          // empty string is considered 0 by isNaN, but NaN by parseInt :)
-          if (isNaN(value) || value === '')
-            return value;
-  
-          // return value converted to number
-          return +value;
-        },
-  
-        setFormatVersion: function() {
-          storageHandler.storage.session.set('formatVersion', storageHandler.storage.formatVersion);
-        },
-  
-        isOutdatedOrNotSet: function() {
-          var version = storageHandler.storage.session.get('formatVersion');
-          if (!version || version < storageHandler.storage.formatVersion)
-            return true;
-  
+      // Use this function over window.sessionStorage.setItem() because
+      // localStorage.setItem() or sessionStorage.setItem() may throw
+      // an exception if the storage is full.
+      // in Mobile Safari (since iOS 5) it always throws when the user
+      // enters private mode (Safari sets quota to 0 bytes in private mode,
+      // contrary to other browsers, which allow storage in private mode,
+      // using separate data containers).
+      set: function (key, value) {
+        try {
+          window.sessionStorage.setItem(key.toString(), value.toString());
+          return true;
+        }
+        catch (e) {
           return false;
         }
       },
+
+      get: function (key) {
+        var value = window.sessionStorage.getItem(key.toString());
+
+        if (value === 'true')
+          return true;
+        if (value === 'false')
+          return false;
+
+        // isNan returns false for empty string
+        // empty string is considered 0 by isNaN, but NaN by parseInt :)
+        if (isNaN(value) || value === '')
+          return value;
+
+        // return value converted to number
+        return +value;
+      },
+
+      remove: function (key) {
+        var value = window.sessionStorage.removeItem(key.toString());
+
+        if (value === 'true')
+          return true;
+        if (value === 'false')
+          return false;
+
+        // isNan returns false for empty string
+        // empty string is considered 0 by isNaN, but NaN by parseInt :)
+        if (isNaN(value) || value === '')
+          return value;
+
+        // return value converted to number
+        return +value;
+
+      },
+
+      setFormatVersion: function () {
+        storageHandler.storage.session.set('formatVersion', storageHandler.storage.formatVersion);
+      },
+
+      isOutdatedOrNotSet: function () {
+        var version = storageHandler.storage.session.get('formatVersion');
+        if (!version || version < storageHandler.storage.formatVersion)
+          return true;
+
+        return false;
+      }
+    },
   }
 }
 
